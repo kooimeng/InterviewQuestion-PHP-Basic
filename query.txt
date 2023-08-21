@@ -1,0 +1,53 @@
+a)
+UPDATE employee_profile_table
+SET job_id = 4
+WHERE employee_no = 1002;
+
+INSERT INTO employee_job_table (employee_no, job_id, effective_date)
+SELECT 1002, 4, '2020-01-01'
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM employee_job_table
+    WHERE employee_no = 1002
+      AND effective_date >= '2020-01-01'
+);
+
+b)
+SELECT
+    ep.employee_name,
+    ej.employee_no,
+    ej.effective_date,
+    jp.job_name
+FROM
+    employee_profile_table ep
+JOIN
+    employee_job_table ej ON ep.employee_no = ej.employee_no
+JOIN
+    job_profile_table jp ON ej.job_id = jp.job_id;
+
+c)
+SELECT
+    ep.employee_name,
+    ej.employee_no,
+    jp.job_name
+FROM
+    employee_profile_table ep
+JOIN
+    (
+        SELECT
+            employee_no,
+            MAX(effective_date) AS latest_effective_date
+        FROM
+            employee_job_table
+        GROUP BY
+            employee_no
+    ) latest_jobs ON ep.employee_no = latest_jobs.employee_no
+JOIN
+    employee_job_table ej ON latest_jobs.employee_no = ej.employee_no
+                        AND latest_jobs.latest_effective_date = ej.effective_date
+JOIN
+    job_profile_table jp ON ej.job_id = jp.job_id;
+
+c)
+
+
